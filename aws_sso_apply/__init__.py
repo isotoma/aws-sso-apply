@@ -603,7 +603,19 @@ def sso_apply(
                 )
                 output_handler(
                     {
-                        "message": "Provisioned permission set",
+                        "message": "Provisioned permission set to master account",
+                        "username": username,
+                        "permission_set_arn": permission_set_arn,
+                    }
+                )
+                sso_admin.provision_permission_set(
+                    InstanceArn=instance_arn,
+                    PermissionSetArn=permission_set_arn,
+                    TargetType="ALL_PROVISIONED_ACCOUNTS",
+                )
+                output_handler(
+                    {
+                        "message": "Provisioned permission set to all provisioned accounts",
                         "username": username,
                         "permission_set_arn": permission_set_arn,
                     }
