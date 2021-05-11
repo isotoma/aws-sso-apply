@@ -222,21 +222,51 @@ def sso_apply(
         if name in permission_sets_by_name:
             raise ValueError(f"Duplicate permission set name {name}")
 
-        account_assignments = sso_admin.list_account_assignments(
-            InstanceArn=instance_arn,
-            AccountId=conf["master-aws-account"],
-            PermissionSetArn=permission_set_arn,
-        )["AccountAssignments"]
+        account_assignments = []
+        account_assignments_params = {
+            "InstanceArn": instance_arn,
+            "AccountId": conf["master-aws-account"],
+            "PermissionSetArn": permission_set_arn,
+        }
+        while True:
+            account_assignments_response = sso_admin.list_account_assignments(
+                **account_assignments_params
+            )
+            account_assignments.extend(
+                account_assignments_response.get("AccountAssignments") or []
+            )
+
+            next_token = account_assignments_response.get("NextToken")
+            if next_token:
+                account_assignments_params["NextToken"] = next_token
+            else:
+                break
 
         inline_policy = sso_admin.get_inline_policy_for_permission_set(
             InstanceArn=instance_arn,
             PermissionSetArn=permission_set_arn,
         )["InlinePolicy"]
 
-        managed_policies = sso_admin.list_managed_policies_in_permission_set(
-            InstanceArn=instance_arn,
-            PermissionSetArn=permission_set_arn,
-        )["AttachedManagedPolicies"]
+        managed_policies = []
+        managed_policies_params = {
+            "InstanceArn": instance_arn,
+            "PermissionSetArn": permission_set_arn,
+        }
+        while True:
+            managed_policies_response = (
+                sso_admin.list_managed_policies_in_permission_set(
+                    **managed_policies_params
+                )
+            )
+            managed_policies.extend(
+                managed_policies_response.get("AttachedManagedPolicies") or []
+            )
+
+            next_token = managed_policies_response.get("NextToken")
+            if next_token:
+                managed_policies_params["NextToken"] = next_token
+            else:
+                break
 
         permission_sets_by_name[name] = {
             "arn": permission_set_arn,
