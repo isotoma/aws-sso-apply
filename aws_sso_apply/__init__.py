@@ -43,6 +43,7 @@ Expected shape of the `conf` argument:
 import boto3
 import difflib
 import json
+import time
 
 
 def make_statement(conf, role_name):
@@ -595,29 +596,84 @@ def sso_apply(
                     )
 
             for permission_set_arn in permission_set_arns_to_provision:
-                sso_admin.provision_permission_set(
-                    InstanceArn=instance_arn,
-                    PermissionSetArn=permission_set_arn,
-                    TargetId=conf["master-aws-account"],
-                    TargetType="AWS_ACCOUNT",
+                provision_for_master_account_response = (
+                    sso_admin.provision_permission_set(
+                        InstanceArn=instance_arn,
+                        PermissionSetArn=permission_set_arn,
+                        TargetId=conf["master-aws-account"],
+                        TargetType="AWS_ACCOUNT",
+                    )
                 )
+
+                for attempt in range(1, 20):
+                    for_master_account_status = sso_admin.describe_permission_set_provisioning_status(
+                        InstanceArn=instance_arn,
+                        ProvisionPermissionSetRequestId=provision_for_master_account_response[
+                            "PermissionSetProvisioningStatus"
+                        ][
+                            "RequestId"
+                        ],
+                    )
+                    if (
+                        for_master_account_status["PermissionSetProvisioningStatus"][
+                            "Status"
+                        ]
+                        == "IN_PROGRESS"
+                    ):
+                        time.sleep(3)
+                    else:
+                        break
+                else:
+                    raise Exception(
+                        "Ran out of attempts waiting for permission set to provision"
+                    )
+
                 output_handler(
                     {
                         "message": "Provisioned permission set to master account",
                         "username": username,
                         "permission_set_arn": permission_set_arn,
+                        "status_details": for_master_account_status,
                     }
                 )
-                sso_admin.provision_permission_set(
-                    InstanceArn=instance_arn,
-                    PermissionSetArn=permission_set_arn,
-                    TargetType="ALL_PROVISIONED_ACCOUNTS",
+
+                provision_for_all_accounts_response = (
+                    sso_admin.provision_permission_set(
+                        InstanceArn=instance_arn,
+                        PermissionSetArn=permission_set_arn,
+                        TargetType="ALL_PROVISIONED_ACCOUNTS",
+                    )
                 )
+
+                for attempt in range(1, 20):
+                    for_all_accounts_status = sso_admin.describe_permission_set_provisioning_status(
+                        InstanceArn=instance_arn,
+                        ProvisionPermissionSetRequestId=provision_for_all_accounts_response[
+                            "PermissionSetProvisioningStatus"
+                        ][
+                            "RequestId"
+                        ],
+                    )
+                    if (
+                        for_all_accounts_status["PermissionSetProvisioningStatus"][
+                            "Status"
+                        ]
+                        == "IN_PROGRESS"
+                    ):
+                        time.sleep(3)
+                    else:
+                        break
+                else:
+                    raise Exception(
+                        "Ran out of attempts waiting for permission set to provision"
+                    )
+
                 output_handler(
                     {
                         "message": "Provisioned permission set to all provisioned accounts",
                         "username": username,
                         "permission_set_arn": permission_set_arn,
+                        "status_details": for_all_accounts_status,
                     }
                 )
             output_handler(
