@@ -628,12 +628,15 @@ def sso_apply(
                         "Ran out of attempts waiting for permission set to provision"
                     )
 
-                if for_master_account_status["Status"] == "SUCCEEDED":
-                    message = ("Provisioned permission set to master account",)
+                if (
+                    for_master_account_status["PermissionSetProvisioningStatus"][
+                        "Status"
+                    ]
+                    == "SUCCEEDED"
+                ):
+                    message = "Provisioned permission set to master account"
                 else:
-                    message = (
-                        "Provisioning of permission set to master account failed",
-                    )
+                    message = "Provisioning of permission set to master account failed"
                 output_handler(
                     {
                         "message": message,
