@@ -362,7 +362,7 @@ def sso_apply(
         if not changes:
             output_handler(
                 {
-                    "message": f"No changes for {username}",
+                    "message": "No changes for user",
                     "username": username,
                 }
             )
@@ -417,7 +417,7 @@ def sso_apply(
 
         output_handler(
             {
-                "message": f"Changes for {username}",
+                "message": "Changes for user",
                 "username": username,
                 "changes": output_changes,
             }
@@ -441,6 +441,14 @@ def sso_apply(
                     created_permission_set_arn = created_permission_set[
                         "PermissionSet"
                     ]["PermissionSetArn"]
+                    output_handler(
+                        {
+                            "message": "Created permission set",
+                            "username": username,
+                            "permission_set_name": permission_set_change["name"],
+                            "permission_set_arn": created_permission_set_arn,
+                        }
+                    )
                     permission_set_arns_to_assign.append(
                         {
                             "permission_set_arn": created_permission_set_arn,
@@ -474,6 +482,13 @@ def sso_apply(
                         PermissionSetArn=permission_set_arn,
                         InlinePolicy=inline_policy_change["policy"],
                     )
+                    output_handler(
+                        {
+                            "message": "Updated inline policy for permission set",
+                            "username": username,
+                            "permission_set_arn": permission_set_arn,
+                        }
+                    )
                     permission_set_arns_to_provision.add(permission_set_arn)
                 else:
                     raise ValueError(
@@ -499,6 +514,14 @@ def sso_apply(
                                 PermissionSetArn=permission_set_arn,
                                 ManagedPolicyArn=to_attach_arn,
                             )
+                            output_handler(
+                                {
+                                    "message": "Attached managed policy for permission set",
+                                    "username": username,
+                                    "permission_set_arn": permission_set_arn,
+                                    "managed_policy_arn": to_attach_arn,
+                                }
+                            )
                         permission_set_arns_to_provision.add(permission_set_arn)
                     if to_detach:
                         for to_detach_arn in to_detach:
@@ -508,6 +531,14 @@ def sso_apply(
                                     "permission_set_arn"
                                 ],
                                 ManagedPolicyArn=to_detach_arn,
+                            )
+                            output_handler(
+                                {
+                                    "message": "Detached managed policy for permission set",
+                                    "username": username,
+                                    "permission_set_arn": permission_set_arn,
+                                    "managed_policy_arn": to_attach_arn,
+                                }
                             )
                         permission_set_arns_to_provision.add(
                             managed_policies_change["permission_set_arn"]
@@ -547,6 +578,14 @@ def sso_apply(
                         PrincipalType="USER",
                         PrincipalId=user_id,
                     )
+                    output_handler(
+                        {
+                            "message": "Created account assignment",
+                            "username": username,
+                            "user_id": user_id,
+                            "permission_set_arn": permission_set_arn,
+                        }
+                    )
                 else:
                     output_handler(
                         {
@@ -562,9 +601,17 @@ def sso_apply(
                     TargetId=conf["master-aws-account"],
                     TargetType="AWS_ACCOUNT",
                 )
+                output_handler(
+                    {
+                        "message": "Provisioned permission set",
+                        "username": username,
+                        "permission_set_arn": permission_set_arn,
+                    }
+                )
             output_handler(
                 {
-                    "message": "Changes applied",
+                    "message": "Changes applied for user",
+                    "username": username,
                 }
             )
 
