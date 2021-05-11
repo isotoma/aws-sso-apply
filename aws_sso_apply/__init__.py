@@ -633,7 +633,7 @@ def sso_apply(
                         "message": "Provisioned permission set to master account",
                         "username": username,
                         "permission_set_arn": permission_set_arn,
-                        "status_details": for_master_account_status,
+                        "status_details": for_master_account_status["PermissionSetProvisioningStatus"],
                     }
                 )
 
@@ -673,7 +673,7 @@ def sso_apply(
                         "message": "Provisioned permission set to all provisioned accounts",
                         "username": username,
                         "permission_set_arn": permission_set_arn,
-                        "status_details": for_all_accounts_status,
+                        "status_details": for_all_accounts_status["PermissionSetProvisioningStatus"],
                     }
                 )
             output_handler(
