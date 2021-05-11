@@ -363,6 +363,10 @@ def sso_apply(
                     )
                     if not diffline.startswith("  ")
                 ]
+                changes_to_print["policy (full)"] = {
+                    "old": src,
+                    "new": dest,
+                }
 
             change_items = []
 
@@ -377,10 +381,6 @@ def sso_apply(
             output_changes.append(
                 {
                     "name": change_nice_name,
-                    "change": {
-                        "old": src,
-                        "new": dest,
-                    },
                     "details": change_items,
                 }
             )
