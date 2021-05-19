@@ -183,14 +183,13 @@ def sso_apply(
 
     users = {}
     for user_email in conf["users"]:
-        user_identifier = user_email.split("@")[0]
         found_users = sso_identity.list_users(
             IdentityStoreId=instance_id,
             MaxResults=25,
             Filters=[
                 {
                     "AttributePath": "UserName",
-                    "AttributeValue": user_identifier,
+                    "AttributeValue": user_email,
                 }
             ],
         )["Users"]
