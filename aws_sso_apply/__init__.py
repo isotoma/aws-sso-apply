@@ -74,13 +74,15 @@ def make_statement(conf, role_name):
             Effect="Allow",
         )
 
+
 def literal_statements(conf, role_name):
     statements = []
     role = conf["roles"][role_name]
-    if 'statements' in role:
-        for s in role['statements']:
+    if "statements" in role:
+        for s in role["statements"]:
             statements.append(json.dumps(s))
     return statements
+
 
 def get_policy_for_user(conf, username):
     statements = []
