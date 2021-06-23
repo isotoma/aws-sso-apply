@@ -83,7 +83,7 @@ def get_policy_for_user(conf, username):
         statement = make_statement(conf, rolename)
         if statement:
             statements.append(statement)
-        statements.extend(conf["users"][username].get("statements", []))
+        statements.extend(conf["roles"][rolename].get("statements", []))
 
         managed_policies = conf["roles"][rolename].get("policies") or []
         managed.extend(managed_policies)
