@@ -17,6 +17,15 @@ Expected shape of the `conf` argument:
     'roles': {
         'ReadOnly': {
             'policies': ['arn:aws:iam::aws:policy/ReadOnlyAccess'],  # policies to attach to the permission set
+            'statements': [{
+                'Action': [
+                    's3:GetObject'
+                ],
+                'Effect': 'Allow',
+                'Resource': [
+                    'arn:aws:s3:::mybucket'
+                ]
+            }],
             'profiles': [{
                 'account': 'myacc1',
                 'role': 'read-only',
@@ -65,6 +74,13 @@ def make_statement(conf, role_name):
             Effect="Allow",
         )
 
+def literal_statements(conf, role_name):
+    statements = []
+    role = conf["roles"][role_name]
+    if 'statements' in role:
+        for s in role['statements']:
+            statements.append(json.dumps(s))
+    return statements
 
 def get_policy_for_user(conf, username):
     statements = []
@@ -74,6 +90,7 @@ def get_policy_for_user(conf, username):
         statement = make_statement(conf, rolename)
         if statement:
             statements.append(statement)
+        statements.extend(literal_statements(conf, rolename))
 
         managed_policies = conf["roles"][rolename].get("policies") or []
         managed.extend(managed_policies)
