@@ -75,15 +75,6 @@ def make_statement(conf, role_name):
         )
 
 
-def literal_statements(conf, role_name):
-    statements = []
-    role = conf["roles"][role_name]
-    if "statements" in role:
-        for s in role["statements"]:
-            statements.append(json.dumps(s))
-    return statements
-
-
 def get_policy_for_user(conf, username):
     statements = []
     managed = []
@@ -92,7 +83,7 @@ def get_policy_for_user(conf, username):
         statement = make_statement(conf, rolename)
         if statement:
             statements.append(statement)
-        statements.extend(literal_statements(conf, rolename))
+        statements.extend(conf["users"][username].get("statements", []))
 
         managed_policies = conf["roles"][rolename].get("policies") or []
         managed.extend(managed_policies)
