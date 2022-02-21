@@ -179,7 +179,7 @@ def sso_apply(
                         f"Missing role name for profile {profile_name} (account={account_name})"
                     )
 
-                if role_name not in conf["accounts"][account_name]["roles"]:
+                if role_name not in conf["accounts"][account_name].get("roles", []):
                     raise Exception(
                         f"Configured role {role_name} for profile {profile_name} does not exist for account {account_name}"
                     )
