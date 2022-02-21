@@ -165,6 +165,24 @@ def sso_apply(
     if check_local_only:
         for username in conf["users"]:
             get_policy_for_user(conf, username)
+        for profile_name, profile in conf["roles"].items():
+            for acc_and_role in profile.get("profiles") or []:
+                account_name = acc_and_role.get("account")
+                role_name = acc_and_role.get("role")
+
+                if not account_name:
+                    raise Exception(
+                        f"Missing account name for profile {profile_name} (role={role_name})"
+                    )
+                if not role_name:
+                    raise Exception(
+                        f"Missing role name for profile {profile_name} (account={account_name})"
+                    )
+
+                if role_name not in conf["accounts"][account_name]["roles"]:
+                    raise Exception(
+                        f"Configured role {role_name} for profile {profile_name} does not exist for account {account_name}"
+                    )
         return
 
     output_handler = output_handler_factory(output_handler)
