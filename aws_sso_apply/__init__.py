@@ -565,7 +565,7 @@ def sso_apply(
                                     "message": "Detached managed policy for permission set",
                                     "username": username,
                                     "permission_set_arn": permission_set_arn,
-                                    "managed_policy_arn": to_attach_arn,
+                                    "managed_policy_arn": to_detach_arn,
                                 }
                             )
                         permission_set_arns_to_provision.add(
